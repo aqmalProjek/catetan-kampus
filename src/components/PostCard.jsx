@@ -5,18 +5,21 @@ import Card from "./Card";
 import ClickOut from "react-simple-clickout";
 import Link from "next/link";
 import { Truncate } from "@/utils/commontFunction";
+import ReactTimeAgo from "react-time-ago";
 
-export default function PostCard() {
+export default function PostCard({post}) {
   const [active, setActive] = useState(false);
+
+  console.log(post);
 
   return (
     <Card>
       <div className="flex gap-3 relative">
         <div>
-          <Link href={'/profile'}>
+          <Link href={`/profile/posts/${post.profiles.id}`}>
             <span className="cursor-pointer">
 
-            <Avatar />
+            <Avatar imageUrl={post.profiles.avatar}/>
             </span>
           </Link>
         </div>
@@ -24,12 +27,14 @@ export default function PostCard() {
           <p>
           <Link href={'/profile'}>
             <span className="font-semibold hover:underline cursor-pointer">
-              Jhon doe
+              {post.profiles.name}
             </span>
           </Link>
             <a className="text-socialBlue"> shared a posts</a>
           </p>
-          <p className="text-gray-500 text-sm">2 hours ago</p>
+          <p className="text-gray-500 text-sm">
+            <ReactTimeAgo date={post.created_at} />
+          </p>
         </div>
         <div>
           <button className="text-gray-400" onClick={() => setActive(true)}>
@@ -126,14 +131,14 @@ export default function PostCard() {
         </div>
       </div>
       <div>
-        <h3 className="underline text-xl">Some judul Artikel of Love</h3>
+        <h3 className="underline text-xl">{post.title}</h3>
         <p className="my-2 text-sm">
           {Truncate("Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio commodi, nam dicta molestiae perspiciatis adipisci ab, reiciendis at animi ipsum asperiores magni non ea! Molestias?")}
           <Link href={'/posts/123223'} className="text-blue-500 hover:text-blue-400"> Baca Selengkapnya...</Link>
         </p>
         <div className="rounded-md overflow-hidden">
           <img
-            src="https://images.unsplash.com/photo-1530841377377-3ff06c0ca713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80"
+            src={post.photos[0]}
             alt=""
           />
         </div>

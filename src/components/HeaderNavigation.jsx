@@ -4,9 +4,21 @@ import Avatar from "./Avatar";
 import { useTheme } from "next-themes";
 import ClickOut from "react-simple-clickout";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { userState } from "@/atoms/userState";
+import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 
 export default function HeaderNavigation() {
+  const [supabase] = useState(() =>
+    createBrowserSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    )
+  );
   const { theme, setTheme, systemTheme } = useTheme();
+  const [userData, setUserData] = useRecoilState(userState);
+  const router = useRouter();
   const [mounted, setMounted] = useState();
   const [active, setActive] = useState(false);
 
@@ -14,8 +26,38 @@ export default function HeaderNavigation() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    const lod = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      supabase.from("profiles").select().eq('id',session?.user?.id)
+      .then(result => {
+        if(result.status !== 400) {
+          setUserData(result?.data[0] || null);
+         
+        } else {
+          setUserData(null);
+        }
+          
+      })
+      // console.log(session.user.id);
+    };
+
+    lod();
+  }, []);
+
+  useEffect(() => {
+    router.refresh();
+  }, [userData]);
+
   if (!mounted) return null;
   const currentTheme = theme === "system" ? systemTheme : theme;
+
+  const logoutHandler = async () => {
+    await supabase.auth.signOut();
+    setUserData(null);
+  };
 
   return (
     <div className="flex  shadow-md w-full h-16 fixed top-0 z-50 bg-white dark:bg-slate-900 items-center px-5 justify-between">
@@ -102,19 +144,19 @@ export default function HeaderNavigation() {
           className="w-12 h-12 cursor-pointer"
           onClick={() => setActive(true)}
         >
-          <Avatar />
-          {active && (
+          <Avatar imageUrl={userData !== null && userData.avatar} />
+          {active && userData && (
             <ClickOut onClickOut={() => setActive(false)}>
               <div className="absolute text-right  py-2 px-3 bg-white dark:bg-slate-900 shadow-md shadow-gray-300 dark:shadow-gray-900 right-0 rounded-sm border border-gray-100 dark:border-gray-800 w-52">
                 <span
                   href=""
                   className="text-sm md:text-md flex gap-1 md:gap-4 py-3 my-2  -mx-4 px-6 md:px-4 hover:my-2 rounded-md transition-all"
                 >
-                  Jhon Doe
+                  {userData.name}
                 </span>
                 <hr className="mx-2" />
                 <Link
-                  href="/profile/"
+                  href="/profile/posts/"
                   className="text-sm md:text-md flex gap-1 md:gap-4 py-3 my-2 hover:bg-blue-500 hover:bg-opacity-20 -mx-4 px-6 md:px-4 hover:my-2 rounded-md transition-all hover:scale-110 hover:shadow-md hover:shadow-gray-300 hover:dark:shadow-gray-900"
                 >
                   <svg
@@ -153,9 +195,11 @@ export default function HeaderNavigation() {
                   </svg>
                   Followers
                 </Link>
-                <Link
-                  href="/login"
-                  className="text-sm md:text-md flex gap-1 md:gap-4 py-3 my-2 hover:bg-blue-500 hover:bg-opacity-20 -mx-4 px-6 md:px-4 hover:my-2 rounded-md transition-all hover:scale-110 hover:shadow-md hover:shadow-gray-300 hover:dark:shadow-gray-900"
+                <span
+                  className="cursor-pointer text-sm md:text-md flex gap-1 md:gap-4 py-3 my-2 hover:bg-blue-500 hover:bg-opacity-20 -mx-4 px-6 md:px-4 hover:my-2 rounded-md transition-all hover:scale-110 hover:shadow-md hover:shadow-gray-300 hover:dark:shadow-gray-900"
+                  onClick={() => {
+                    logoutHandler();
+                  }}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +216,7 @@ export default function HeaderNavigation() {
                     />
                   </svg>
                   Logout
-                </Link>
+                </span>
               </div>
             </ClickOut>
           )}

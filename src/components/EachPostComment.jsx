@@ -5,11 +5,15 @@ import { useTheme } from "next-themes";
 import ClickOut from "react-simple-clickout";
 import Data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
+import {  useRecoilValue } from "recoil";
+import { userState } from "@/atoms/userState";
 
 export default function EachPostComment() {
   const { theme } = useTheme();
   const [showEmoji, setShowEmoji] = useState(false);
   const [content, setContent] = useState("");
+  const userData = useRecoilValue(userState);
+  console.log(userData);
 
   const addEmoji = (e) => {
     let sym = e.unified.split("-");
@@ -22,11 +26,11 @@ export default function EachPostComment() {
     <div className="mt-5 border-t border-t-gray-500 -mx-4 relative">
       <div className="flex gap-2 px-5 mt-3">
         <div>
-          <Avatar />
+        <Avatar imageUrl={userData !== null && userData.avatar}/>
         </div>
         <textarea
           className="grow block w-full p-3 h-14 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder={`Comment Something...!`}
+          placeholder={`Comment your opinion, ${userData[0].name}`}
           value={content}
           onChange={e => setContent(e.target.value)}
         />

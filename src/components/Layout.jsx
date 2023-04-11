@@ -3,8 +3,16 @@ import React from 'react'
 import NavigationCard from './NavigationCard'
 import HeaderNavigation from './HeaderNavigation';
 import { ThemeProvider } from 'next-themes';
+import { RecoilRoot } from 'recoil';
+import TimeAgo from 'javascript-time-ago'
+
+import en from 'javascript-time-ago/locale/en.json'
+TimeAgo.addDefaultLocale(en)
 
 export default function Layout({children,hideNafigation}) {
+  
+  
+
   let rightCollumnClasses = 'text-black';
   if(hideNafigation) {
     rightCollumnClasses += ' w-full'
@@ -14,6 +22,7 @@ export default function Layout({children,hideNafigation}) {
   return (
     <>
     <ThemeProvider enableSystem={true} attribute='class'>
+      <RecoilRoot>
     {!hideNafigation && (
     <HeaderNavigation />
       )}
@@ -29,6 +38,7 @@ export default function Layout({children,hideNafigation}) {
       </div>
 
     </div>
+    </RecoilRoot>
     </ThemeProvider>
     </>
   )
