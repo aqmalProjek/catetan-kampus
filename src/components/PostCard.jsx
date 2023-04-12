@@ -6,11 +6,10 @@ import ClickOut from "react-simple-clickout";
 import Link from "next/link";
 import { Truncate } from "@/utils/commontFunction";
 import ReactTimeAgo from "react-time-ago";
+import { ReactMarkdown } from "react-markdown/lib/react-markdown";
 
 export default function PostCard({post}) {
   const [active, setActive] = useState(false);
-
-  console.log(post);
 
   return (
     <Card>
@@ -33,7 +32,7 @@ export default function PostCard({post}) {
             <a className="text-socialBlue"> shared a posts</a>
           </p>
           <p className="text-gray-500 text-sm">
-            <ReactTimeAgo date={post.created_at} />
+            <ReactTimeAgo date={(new Date(post.created_at)).getTime()} />
           </p>
         </div>
         <div>
@@ -132,10 +131,11 @@ export default function PostCard({post}) {
       </div>
       <div>
         <h3 className="underline text-xl">{post.title}</h3>
-        <p className="my-2 text-sm">
-          {Truncate("Lorem ipsum dolor sit amet, consectetur adipisicing elit. Optio commodi, nam dicta molestiae perspiciatis adipisci ab, reiciendis at animi ipsum asperiores magni non ea! Molestias?")}
+        <ReactMarkdown className="text-sm mt-2">
+          {Truncate(post.content)}
+        </ReactMarkdown>
           <Link href={'/posts/123223'} className="text-blue-500 hover:text-blue-400"> Baca Selengkapnya...</Link>
-        </p>
+        
         <div className="rounded-md overflow-hidden">
           <img
             src={post.photos[0]}

@@ -156,7 +156,7 @@ export default function HeaderNavigation() {
                 </span>
                 <hr className="mx-2" />
                 <Link
-                  href="/profile/posts/"
+                  href={`/profile/posts/${userData.id}`}
                   className="text-sm md:text-md flex gap-1 md:gap-4 py-3 my-2 hover:bg-blue-500 hover:bg-opacity-20 -mx-4 px-6 md:px-4 hover:my-2 rounded-md transition-all hover:scale-110 hover:shadow-md hover:shadow-gray-300 hover:dark:shadow-gray-900"
                 >
                   <svg

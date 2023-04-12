@@ -3,7 +3,7 @@ import { userState } from "@/atoms/userState";
 import supabase from "@/utils/supabase";
 import { uploadUserProfileImage } from "@/utils/user";
 import React, { useState } from "react";
-import { useRecoilValue } from "recoil";
+import { useRecoilState} from "recoil";
 
 export default function Avatar({ size, imageUrl = null, editable, onChange }) {
   let imageUse =
@@ -16,7 +16,7 @@ export default function Avatar({ size, imageUrl = null, editable, onChange }) {
 
   const [isError,setIsError] = useState("");
     const [isLoading,setIsLoading] = useState(false);
-    const userData = useRecoilValue(userState);
+    const [userData,setUserData] = useRecoilState(userState);
 
   const editAvatar = async(e) => {
     const file = e.target.files?.[0];
@@ -30,7 +30,9 @@ export default function Avatar({ size, imageUrl = null, editable, onChange }) {
         }
         if(file) {
             await uploadUserProfileImage(supabase,userData.id,file,'avatars','avatar')
-            if(onChange) onChange();
+            if(onChange) {
+              const res = onChange()
+            }
         }
         setIsLoading(false)
   }

@@ -4,12 +4,12 @@ import { usePathname } from "next/navigation";
 import React from "react";
 import Card from "./Card";
 import { userState } from "@/atoms/userState";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 
 export default function NavigationCard() {
   const pathName = usePathname();
 
-  const [userData, setUserData] = useRecoilState(userState);
+  const userData = useRecoilValue(userState);
 
   const activeElement =
     "text-sm md:text-md flex gap-1 md:gap-4 py-3 bg-socialBlue text-white md:-mx-8 px-6 md:px-8 rounded-md shadow-md shadow-gray-300 dark:shadow-gray-900";
@@ -65,9 +65,9 @@ export default function NavigationCard() {
               <span className="hidden md:block">Add Post</span>
             </Link>
             <Link
-              href="/profile/followers"
+              href={`/profile/followers/${userData.id}`}
               className={
-                pathName === "/profile/followers"
+                pathName.includes('followers')
                   ? activeElement
                   : nonActiveElement
               }
