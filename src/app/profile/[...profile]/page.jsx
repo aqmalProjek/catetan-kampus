@@ -11,9 +11,11 @@ export async function generateStaticParams(){
   return profileUsers ?? []
 }
 
-export const metadata = {
-  title: 'Catetan Kampus - Profile',
-  description: 'Catetan Kampus adalah website untuk membahas dan mendiskusikan kampus masing masing',
+export async function generateMetadata({ params }) {
+  const {data: profileUser} = await supabase.from('profiles').select().match({'id' : params.profile[1]}).single();
+  return {
+    title: `Catetan Kampus - ${profileUser.name}`,
+  };
 }
 
 export default async function ProfilePage({ params }) {
@@ -22,6 +24,7 @@ export default async function ProfilePage({ params }) {
 
   const {data: posts} = await supabase.from('posts').select('id, content,title, created_at, profiles(id,avatar,name), photos').match({'author' : params.profile[1]})
 
+  console.log(profileUser);
   
   if(profileUser?.code == '22P02') {
     return notFound();

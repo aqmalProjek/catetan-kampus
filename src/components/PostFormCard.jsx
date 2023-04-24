@@ -43,6 +43,24 @@ export default function PostFormCard() {
     setIsLoading(true);
     setMessage("");
 
+    if(content === ""){
+      setMessage("Please add content artikel");
+      setIsLoading(false)
+      return;
+    }
+
+    if(title === ""){
+      setMessage("Please add title artikel");
+      setIsLoading(false)
+      return;
+    }
+
+    if(uploads.length === 0) {
+      setMessage("Please add some picture");
+      setIsLoading(false)
+      return;
+    }
+
     try {
       const res = await supabase.from("posts").insert({
         title,
@@ -83,7 +101,6 @@ export default function PostFormCard() {
     setIsLoading(false);
   }
 
-  console.log(uploads);
   return (
     <>
       <Card>

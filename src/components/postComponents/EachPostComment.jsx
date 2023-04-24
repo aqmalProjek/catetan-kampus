@@ -1,19 +1,22 @@
 "use client"
 import React, { useState } from "react";
-import Avatar from "./Avatar";
+import Avatar from "../Avatar";
 import { useTheme } from "next-themes";
 import ClickOut from "react-simple-clickout";
 import Data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
 import {  useRecoilValue } from "recoil";
 import { userState } from "@/atoms/userState";
+import supabase from "@/utils/supabase";
 
-export default function EachPostComment() {
+export default function EachPostComment({postId}) {
   const { theme } = useTheme();
   const [showEmoji, setShowEmoji] = useState(false);
   const [content, setContent] = useState("");
   const userData = useRecoilValue(userState);
-  console.log(userData);
+  const [isError,setIsError] = useState("");
+  const [isLoading,setIsLoading] = useState(false);
+  const [uploads,setUploads] = useState([]);
 
   const addEmoji = (e) => {
     let sym = e.unified.split("-");
@@ -22,15 +25,62 @@ export default function EachPostComment() {
     let emoji = String.fromCodePoint(...codeArray);
     setContent(content + emoji);
   };
+
+  const createComment = async() => {
+    setIsError("");
+    if(content === "") {
+      setIsError('Mohon tulis komentar mu');
+      return;
+    }
+    let uploadedImage = null
+
+    if(uploads.length !== 0 ) {
+      uploadedImage = uploads[0]
+    }
+
+    const res = await supabase.from('comments').insert({
+      user_id : userData.id,
+      text: content,
+      post_id: postId,
+      image:  uploadedImage
+    })
+
+    setContent("");
+    setUploads([]);
+  }
+
+
+  const addPhotos = async(e) => {
+    setIsLoading(true);
+    const files = e.target.files;
+    setIsError("");
+    setIsError('Uploading your images, please wait..!!!');
+    for (const file of files) {
+      if(file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/jpg') {
+        setIsError('Your files is not an image. please try again');
+        e.target.value = null
+        return;
+      } 
+        const newName = Date.now() + file.name;
+         const res = await supabase.storage.from('comments').upload(newName,file);
+         if(res.data) {
+          const url =  process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/comments/' + newName
+          setUploads(prevUpload => [...prevUpload,url])
+         }
+    }
+    setIsError("");
+    setIsLoading(false);
+  }
   return (
     <div className="mt-5 border-t border-t-gray-500 -mx-4 relative">
+      <span className="text-sm text-red-500 ml-5">{isError}</span>
       <div className="flex gap-2 px-5 mt-3">
         <div>
         <Avatar imageUrl={userData !== null && userData.avatar}/>
         </div>
         <textarea
           className="grow block w-full p-3 h-14 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder={`Comment your opinion, ${userData[0].name}`}
+          placeholder={`Comment your opinion, ${userData?.name}`}
           value={content}
           onChange={e => setContent(e.target.value)}
         />
@@ -56,7 +106,8 @@ export default function EachPostComment() {
           </button>
         </div>
         <div>
-          <button className="flex gap-1">
+          <label className="flex gap-1 cursor-pointer">
+          <input type="file" className="hidden" onChange={addPhotos} />
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -73,7 +124,7 @@ export default function EachPostComment() {
             </svg>
 
             <span className="hidden md:block">Upload Image</span>
-          </button>
+          </label>
         </div>
         {showEmoji && (
           <ClickOut onClickOut={() => setShowEmoji(false)}>
@@ -83,11 +134,18 @@ export default function EachPostComment() {
           </ClickOut>
         )}
         <div className="grow text-right">
-          <button className="bg-socialBlue text-white px-6 py-1 rounded-md">
+          <button className="bg-socialBlue text-white px-6 py-1 rounded-md" onClick={createComment} disabled={isLoading}>
             Comment
           </button>
         </div>
       </div>
+        <div className="flex justify-evenly w-full flex-wrap mt-3">
+          {uploads.map(upload => (
+            <div className="h-28 w-28" key={upload}>
+              <img src={upload} alt="" className="w-full h-full object-cover rounded-md" />
+            </div>
+          ))}
+        </div>
     </div>
   );
 }

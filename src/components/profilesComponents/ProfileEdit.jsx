@@ -57,9 +57,7 @@ export default function ProfileEdit({params,profileUser,posts}) {
 
   // console.log();
 
-  if (userSession === undefined) {
-    notFound();
-  }
+  
 
   const fetchUser = async () => {
     if (userId == undefined) {
